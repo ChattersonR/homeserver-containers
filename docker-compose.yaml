@@ -1,0 +1,4 @@
+include:
+  - path: ./infrastructure.compose.yaml
+  - path: ./media-management.compose.yaml
+  - path: ./media-players.compose.yaml

@@ -1,0 +1,70 @@
+name: infrastructure
+services:
+  portainer:
+    image: portainer/portainer-ce:alpine
+    container_name: portainer
+    command: -H unix:///var/run/docker.sock
+    environment:
+      - VIRTUAL_HOST=portainer
+      - VIRTUAL_PORT=9000
+#    ports:
+#      - 9000:9000
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock"
+      - "portainer_data:/data"
+    restart: unless-stopped
+    depends_on:
+      - portainer-tailscale-sidecar
+    network_mode: service:portainer-tailscale-sidecar
+  portainer-tailscale-sidecar:
+    hostname: portainer
+    container_name: portainer-tailscale-sidecar
+    image: tailscale/tailscale:latest
+    healthcheck:
+      test: ["CMD-SHELL", "tailscale status"]
+      interval: 1s
+      timeout: 5s
+      retries: 60
+    environment:
+      - TS_AUTHKEY=${TS_AUTHKEY}?ephemeral=false
+      - TS_EXTRA_ARGS=--advertise-tags=tag:container
+      - TS_STATE_DIR=/var/lib/tailscale
+    volumes:
+      - "${APPDATA_PATH}/tailscale_portainer_var_lib:/var/lib/tailscale"
+      - "/dev/net/tun:/dev/net/tun"
+    cap_add:
+      - net_admin
+      - sys_module
+    restart: unless-stopped
+    networks:
+      - services
+  pihole:
+    container_name: pihole
+    image: pihole/pihole:latest
+    network_mode: "host"
+    environment:
+      TZ: 'America/New York'
+      WEB_PORT: 9898
+      WEBPASSWORD: "${PIHOLE_PASS}"
+    # Volumes store your data between container upgrades
+    volumes:
+      - "${APPDATA_PATH}/pihole/etc-pihole:/etc/pihole"
+      - "${APPDATA_PATH}/pihole/etc-dnsmasq.d:/etc/dnsmasq.d"
+    #   https://github.com/pi-hole/docker-pi-hole#note-on-capabilities
+    cap_add:
+      - NET_ADMIN # Required if you are using Pi-hole as your DHCP server, else not needed
+    restart: unless-stopped
+
+# TODO: Bootstrap the network and nginx proxy as well.
+
+volumes:
+  portainer_data:
+    external: true
+    name: portainer_data
+networks:
+  services:
+    external: true
+    name: services
+env_file:
+  - path: base.env
+  - path: secret.secret
