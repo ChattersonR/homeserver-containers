@@ -7,3 +7,5 @@ https://tailscale.com/blog/docker-tailscale-guide
 Copy `env.template` to `.env` and fill out missing information.
 
 docker-compose.yaml should start all containers.
+
+I also needed to install gnupg2 and pass because reasons. Why is docker cli tied to freedesktop stuff?

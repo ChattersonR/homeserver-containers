@@ -1,4 +1,0 @@
-include:
-  - ./infrastructure.compose.yaml
-  - ./media-management.compose.yaml
-  - ./media-players.compose.yaml
