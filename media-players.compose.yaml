@@ -57,6 +57,3 @@ networks:
     # Optional - may be necessary for docker healthcheck to pass if running in host network mode
     #extra_hosts:
     #  - "host.docker.internal:host-gateway"
-env_file:
-  - path: base.env
-  - path: secret.secret

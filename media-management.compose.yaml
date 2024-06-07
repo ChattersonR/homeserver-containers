@@ -185,7 +185,3 @@ networks:
   services:
     name: services
     external: true
-env_files:
-  - path: base.env
-  - path: media-management.env
-  - path: secret.secret

@@ -1,4 +1,4 @@
 include:
-  - path: ./infrastructure.compose.yaml
-  - path: ./media-management.compose.yaml
-  - path: ./media-players.compose.yaml
+  - ./infrastructure.compose.yaml
+  - ./media-management.compose.yaml
+  - ./media-players.compose.yaml

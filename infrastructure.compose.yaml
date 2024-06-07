@@ -65,6 +65,3 @@ networks:
   services:
     external: true
     name: services
-env_file:
-  - path: base.env
-  - path: secret.secret
