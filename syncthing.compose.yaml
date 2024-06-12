@@ -1,0 +1,57 @@
+name: syncthing
+services:
+  common-tailscale-sidecar:
+    image: tailscale/tailscale:latest
+    healthcheck:
+      test: ["CMD-SHELL", "tailscale status"]
+      interval: 1s
+      timeout: 5s
+      retries: 60
+    environment:
+      - TS_AUTHKEY=${TS_AUTHKEY}?ephemeral=false
+      - TS_EXTRA_ARGS=--advertise-tags=tag:container
+      - TS_STATE_DIR=/var/lib/tailscale
+    volumes:
+      - "/dev/net/tun:/dev/net/tun"
+    cap_add:
+      - net_admin
+      - sys_module
+    restart: unless-stopped
+    networks:
+      - services
+
+  syncthing:
+    image: syncthing/syncthing
+    container_name: syncthing
+    environment:
+      - PUID=${PUID_SYNCTHING}
+      - PGID=${PGID_SYNCTHING}
+      #- STGUIADDRESS=
+      #- PCAP=cap_chown,cap_fowner+ep
+    volumes:
+      - ${SYNCTHING_PATH}:/data
+      - ${APPDATA_PATH}/syncthing:/var/syncthing
+    network_mode: service:syncthing-tailscale-sidecar
+#    ports:
+#      - 8384:8384 # Web UI
+#      - 22000:22000/tcp # TCP file transfers
+#      - 22000:22000/udp # QUIC file transfers
+#      - 21027:21027/udp # Receive local discovery broadcasts
+    restart: unless-stopped
+  syncthing-tailscale-sidecar:
+    extends:
+      service: common-tailscale-sidecar
+    hostname: syncthing
+    container_name: syncthing-tailscale-sidecar
+    expose:
+      - 8384
+      - 22000
+      - 22000
+      - 21027
+    volumes:
+      - "${APPDATA_PATH}/tailscale_deluge_var_lib:/var/lib/tailscale"
+
+networks:
+  services:
+    name: services
+    external: true

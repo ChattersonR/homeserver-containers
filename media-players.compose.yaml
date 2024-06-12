@@ -18,7 +18,8 @@ services:
       resources:
         reservations:
           devices:
-            - capabilities: [gpu]
+            - driver: nvidia
+              capabilities: [gpu]
     depends_on:
       - jellyfin-tailscale-sidecar
     network_mode: service:jellyfin-tailscale-sidecar
@@ -34,8 +35,8 @@ services:
       timeout: 5s
       retries: 60
     environment:
-      - TS_AUTHKEY=${TS_AUTHKEY}?ephemeral=false
-      - TS_EXTRA_ARGS=--advertise-tags=tag:container
+      - TS_AUTHKEY=${TS_AUTHKEY_SHARED}?ephemeral=false
+      - TS_EXTRA_ARGS=--advertise-tags=tag:container,tag:shared
       - TS_STATE_DIR=/var/lib/tailscale
     volumes:
       - "${APPDATA_PATH}/tailscale_jellyfin_var_lib:/var/lib/tailscale"

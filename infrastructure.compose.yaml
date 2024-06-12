@@ -11,7 +11,7 @@ services:
 #      - 9000:9000
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock"
-      - "portainer_data:/data"
+      - "${APPDATA_PATH}/portainer:/data"
     restart: unless-stopped
     depends_on:
       - portainer-tailscale-sidecar
@@ -38,6 +38,10 @@ services:
     restart: unless-stopped
     networks:
       - services
+  watchtower:
+    image: containrrr/watchtower
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
   pihole:
     container_name: pihole
     image: pihole/pihole:latest
@@ -57,10 +61,6 @@ services:
 
 # TODO: Bootstrap the network and nginx proxy as well.
 
-volumes:
-  portainer_data:
-    external: true
-    name: portainer_data
 networks:
   services:
     external: true

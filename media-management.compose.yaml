@@ -83,7 +83,7 @@ services:
     environment:
       - PUID=${PUID}
       - PGID=${PGID}
-      - TZ=America/New_York
+      - TZ=${TZ}
       - VIRTUAL_HOST=tv
     volumes:
       - ${APPDATA_PATH}/sonarr:/config
@@ -109,7 +109,7 @@ services:
     environment:
       - PUID=${PUID}
       - PGID=${PGID}
-      - TZ=America/New_York
+      - TZ=${TZ}
       - VIRTUAL_HOST=movies
     volumes:
       - ${APPDATA_PATH}/radarr:/config
@@ -135,7 +135,7 @@ services:
     environment:
       - PUID=${PUID}
       - PGID=${PGID}
-      - TZ=America/New_York
+      - TZ=${TZ}
       - VIRTUAL_HOST=music
     volumes:
       - ${APPDATA_PATH}/lidarr:/config
@@ -161,7 +161,7 @@ services:
     environment:
       - PUID=${PUID}
       - PGID=${PGID}
-      - TZ=America/New_York
+      - TZ=${TZ}
       - VIRTUAL_HOST=indexers
     volumes:
       - ${APPDATA_PATH}/prowlarr:/config
