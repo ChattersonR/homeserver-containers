@@ -31,6 +31,8 @@ services:
     volumes:
       - ${SYNCTHING_PATH}:/data
       - ${APPDATA_PATH}/syncthing:/var/syncthing
+    depends_on:
+      - syncthing-tailscale-sidecar
     network_mode: service:syncthing-tailscale-sidecar
 #    ports:
 #      - 8384:8384 # Web UI

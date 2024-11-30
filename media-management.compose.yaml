@@ -22,12 +22,12 @@ services:
   deluge:
     container_name: deluge
     image: binhex/arch-delugevpn
-#    expose:
-#      - 8118
-#      - 58846
-#      - 58946
-#    ports:
-#      - 8112:8112
+    expose:
+      - 8118
+      - 58846
+      - 58946
+    ports:
+      - 8112:8112
     volumes:
       - ${APPDATA_PATH}/deluge:/config
       - ${DOWNLOADS_DIR}:/data
@@ -60,23 +60,23 @@ services:
     # For openvpn
     #cap_add:
     #  - NET_ADMIN
-    depends_on:
-      - deluge-tailscale-sidecar
-    network_mode: service:deluge-tailscale-sidecar
-#    networks:
-#      - services
-  deluge-tailscale-sidecar:
-    extends:
-      service: common-tailscale-sidecar
-    hostname: deluge
-    container_name: deluge-tailscale-sidecar
-    expose:
-      - 8112
-      - 8118
-      - 58846
-      - 58946
-    volumes:
-      - "${APPDATA_PATH}/tailscale_deluge_var_lib:/var/lib/tailscale"
+#    depends_on:
+#      - deluge-tailscale-sidecar
+#    network_mode: service:deluge-tailscale-sidecar
+    networks:
+      - services
+#  deluge-tailscale-sidecar:
+#    extends:
+#      service: common-tailscale-sidecar
+#    hostname: deluge
+#    container_name: deluge-tailscale-sidecar
+#    expose:
+#      - 8112
+#      - 8118
+#      - 58846
+#      - 58946
+#    volumes:
+#      - "${APPDATA_PATH}/tailscale_deluge_var_lib:/var/lib/tailscale"
   sonarr:
     image: lscr.io/linuxserver/sonarr:latest
     container_name: sonarr

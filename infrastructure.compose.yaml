@@ -1,12 +1,32 @@
 name: infrastructure
 services:
+  common-tailscale-sidecar:
+    image: tailscale/tailscale:latest
+    healthcheck:
+      test: ["CMD-SHELL", "tailscale status"]
+      interval: 1s
+      timeout: 5s
+      retries: 60
+    environment:
+      - TS_AUTHKEY=${TS_AUTHKEY}?ephemeral=false
+      - TS_EXTRA_ARGS=--advertise-tags=tag:container
+      - TS_STATE_DIR=/var/lib/tailscale
+    volumes:
+      - "/dev/net/tun:/dev/net/tun"
+    cap_add:
+      - net_admin
+      - sys_module
+    restart: unless-stopped
+    networks:
+      - services
+
   portainer:
     image: portainer/portainer-ce:alpine
     container_name: portainer
     command: -H unix:///var/run/docker.sock
     environment:
       - VIRTUAL_HOST=portainer
-      - VIRTUAL_PORT=9000
+      - VIRTUAL_PORT=80
 #    ports:
 #      - 9000:9000
     volumes:
@@ -38,6 +58,42 @@ services:
     restart: unless-stopped
     networks:
       - services
+  dashy:
+    # To build from source, replace 'image: lissy93/dashy' with 'build: .'
+    # build: .
+    image: lissy93/dashy
+    container_name: dashy
+    # Pass in your config file below, by specifying the path on your host machine
+    volumes:
+      - "${APPDATA_PATH}/dashy:/app/user-data"
+    #ports:
+    #  - 4000:8080
+    # Set any environmental variables
+    environment:
+      - PORT=80
+      - NODE_ENV=production
+    # Specify your user ID and group ID. You can find this by running `id -u` and `id -g`
+      - UID=${PUID}
+      - GID=${PGID}
+    # Specify restart policy
+    restart: unless-stopped
+    depends_on:
+      - dashy-tailscale-sidecar
+    network_mode: service:dashy-tailscale-sidecar
+    # Configure healthchecks
+    healthcheck:
+      test: ['CMD', 'node', '/app/services/healthcheck']
+      interval: 1m30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+  dashy-tailscale-sidecar:
+    extends:
+      service: common-tailscale-sidecar
+    hostname: dash
+    container_name: dashy-tailscale-sidecar
+    volumes:
+      - "${APPDATA_PATH}/tailscale_dashy_var_lib:/var/lib/tailscale"
   watchtower:
     image: containrrr/watchtower
     volumes:
@@ -58,9 +114,59 @@ services:
     cap_add:
       - NET_ADMIN # Required if you are using Pi-hole as your DHCP server, else not needed
     restart: unless-stopped
+  prometheus:
+    image: prom/prometheus
+    container_name: prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      #- '--log.level=debug'
+    #ports:
+    #  - 9090:9090
+    depends_on:
+      - prometheus-tailscale-sidecar
+    network_mode: service:prometheus-tailscale-sidecar
+    restart: unless-stopped
+    volumes:
+      - ${APPDATA_PATH}/prometheus:/etc/prometheus
+      - prom_data:/prometheus
+  prometheus-tailscale-sidecar:
+    extends:
+      service: common-tailscale-sidecar
+    hostname: prometheus
+    container_name: prometheus-tailscale-sidecar
+    volumes:
+      - "${APPDATA_PATH}/tailscale_prometheus_var_lib:/var/lib/tailscale"
+  grafana:
+    image: grafana/grafana
+    container_name: grafana
+    #ports:
+    #  - 3000:3000
+    depends_on:
+      - grafana-tailscale-sidecar
+    network_mode: service:grafana-tailscale-sidecar
+    restart: unless-stopped
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=grafana
+      - GF_SERVER_HTTP_PORT=80
+      - GF_SECURITY_ALLOW_EMBEDDING=true
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+      #- GF_SECURITY_DISABLE_SANITIZE_HTML=true
+    volumes:
+      - ${APPDATA_PATH}/grafana/etc_provisioning:/etc/grafana/provisioning/datasources
+      - ${APPDATA_PATH}/grafana/var_lib:/var/lib/grafana
+  grafana-tailscale-sidecar:
+    extends:
+      service: common-tailscale-sidecar
+    hostname: grafana
+    container_name: grafana-tailscale-sidecar
+    volumes:
+      - "${APPDATA_PATH}/tailscale_grafana_var_lib:/var/lib/tailscale"
 
 # TODO: Bootstrap the network and nginx proxy as well.
 
+volumes:
+  prom_data:
 networks:
   services:
     external: true

@@ -13,13 +13,14 @@ services:
       - ${APPDATA_PATH}/jellyfin-cache:/cache
       - /srv/dev-disk-by-label-nas2020/media:/media
     restart: 'unless-stopped'
-    runtime: nvidia
+    #runtime: nvidia
     deploy:
       resources:
         reservations:
           devices:
-            - driver: nvidia
-              capabilities: [gpu]
+            - driver: cdi
+              device_ids:
+                - nvidia.com/gpu=all
     depends_on:
       - jellyfin-tailscale-sidecar
     network_mode: service:jellyfin-tailscale-sidecar
