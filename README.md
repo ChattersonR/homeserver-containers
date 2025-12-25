@@ -41,3 +41,11 @@ compose file substitution.
 ---
 
 I also needed to install gnupg2 and pass because reasons. Why is docker cli tied to freedesktop authenticator apis?
+
+---
+
+Docker Network Macvlan
+
+`docker network create -d macvlan --subnet=192.168.88.0/24 --gateway=192.168.88.1 -o parent=eth0 lan-services`
+`docker network create services`
+`docker network create -d ipvlan --subnet=10.0.0.0/24 --gateway=10.0.0.1 --aux-address="host=10.0.0.223" --ip-range 10.0.0.192/27 -o parent=enp0s25 lan-services`

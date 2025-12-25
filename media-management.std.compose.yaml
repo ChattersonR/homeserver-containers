@@ -1,24 +1,5 @@
 name: media-management
 services:
-  common-tailscale-sidecar:
-    image: tailscale/tailscale:latest
-    healthcheck:
-      test: ["CMD-SHELL", "tailscale status"]
-      interval: 1s
-      timeout: 5s
-      retries: 60
-    environment:
-      - TS_AUTHKEY=${TS_AUTHKEY}?ephemeral=false
-      - TS_EXTRA_ARGS=--advertise-tags=tag:container
-      - TS_STATE_DIR=/var/lib/tailscale
-    volumes:
-      - "/dev/net/tun:/dev/net/tun"
-    cap_add:
-      - net_admin
-      - sys_module
-    restart: unless-stopped
-    networks:
-      - services
   deluge:
     container_name: deluge
     image: binhex/arch-delugevpn
@@ -98,6 +79,7 @@ services:
 #      - services
   sonarr-tailscale-sidecar:
     extends:
+      file: common.yaml
       service: common-tailscale-sidecar
     hostname: tv
     container_name: sonarr-tailscale-sidecar
@@ -124,6 +106,7 @@ services:
 #      - services
   radarr-tailscale-sidecar:
     extends:
+      file: common.yaml
       service: common-tailscale-sidecar
     hostname: movies
     container_name: radarr-tailscale-sidecar
@@ -150,6 +133,7 @@ services:
 #      - services
   lidarr-tailscale-sidecar:
     extends:
+      file: common.yaml
       service: common-tailscale-sidecar
     hostname: music
     container_name: lidarr-tailscale-sidecar
@@ -175,6 +159,7 @@ services:
 #      - services
   prowlarr-tailscale-sidecar:
     extends:
+      file: common.yaml
       service: common-tailscale-sidecar
     hostname: indexers
     container_name: indexers-tailscale-sidecar

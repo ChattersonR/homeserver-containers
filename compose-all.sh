@@ -1,3 +1,3 @@
 #!/usr/bin/env bash
 
-find . -name "*.compose.yaml" -exec docker compose -f {} $@ \;
+find . -name "*.std.compose.yaml" -exec docker compose -f {} $@ \;

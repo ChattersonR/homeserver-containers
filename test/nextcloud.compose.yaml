@@ -1,0 +1,52 @@
+services:
+  #  db:
+  #    image: mariadb:10.11
+  #    restart: always
+  #    command: --transaction-isolation=READ-COMMITTED
+  #    volumes:
+  #      - db:/var/lib/mysql
+  #    environment:
+  #      - MYSQL_ROOT_PASSWORD=
+  #      - MYSQL_PASSWORD=
+  #      - MYSQL_DATABASE=nextcloud
+  #      - MYSQL_USER=nextcloud
+  #
+  #  redis:
+  #    image: redis:alpine
+  #    restart: always
+
+  nextcloud:
+    image: nextcloud
+    restart: always
+    depends_on:
+      - nextcloud-tailscale-sidecar
+    #      - redis
+    #      - db
+    network_mode: service:nextcloud-tailscale-sidecar
+    volumes:
+      - nextcloud:/var/www/html
+      - /tmp/nextcloudtmp:/tmp/host
+      #environment:
+      #      - MYSQL_PASSWORD=
+      #      - MYSQL_DATABASE=nextcloud
+      #      - MYSQL_USER=nextcloud
+      #      - MYSQL_HOST=db
+  nextcloud-tailscale-sidecar:
+    extends:
+      file: common.yaml
+      service: common-tailscale-sidecar
+    hostname: nextcloud
+    container_name: nextcloud-tailscale-sidecar
+    environment:
+      - TS_SERVE_CONFIG=/config/nextcloud.json
+    volumes:
+      - "${APPDATA_PATH}/tailscale_nextcloud_config:/config"
+      - "${APPDATA_PATH}/tailscale_nextcloud_var_lib:/var/lib/tailscale"
+
+volumes:
+  nextcloud:
+    #  db:
+networks:
+  services:
+    name: services
+    external: true
