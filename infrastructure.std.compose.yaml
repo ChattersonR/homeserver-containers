@@ -154,3 +154,5 @@ networks:
   services:
     external: true
     name: services
+    driver_opts:
+      com.docker.network.driver.mtu: "1280" # Can be set to 9001 for jumbo frames
